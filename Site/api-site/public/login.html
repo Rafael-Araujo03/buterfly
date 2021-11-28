@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Butterfly Effect</title>
+
+    <script src="./js/funcoes.js"></script>
+
+    <link rel="icon" href="./imagens/logo.jpg">
+    <link rel="stylesheet" href="./css/index.css">
+    <link rel="stylesheet" href="./css/login.css">
+    <!--Colocar icones nas inputs e afins-->
+    <script src="https://kit.fontawesome.com/a5f211c82a.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!--Header da minha pagina-->
+    <header>
+        <!--Div container do logo-->
+        <div class="container-logo">
+            <img src="./imagens/logo.jpg" class="logo-imagem"></img>
+            <div class="logo-texto">
+                <h2>BUTTERFLY EFFECT</h2>
+            </div>
+        </div>
+
+        <!--Menu-->
+        <div class="menu">
+            <ul>
+                <li><a href="./index.html">Inicio</a></li>
+                <li><a href="./filmes.html">Filmes</a></li>
+                <li><a href="./login.html">Login</a></li>
+                <li><a href="./cadastro.html">Cadastro</a></li>
+            </ul>
+        </div>
+    </header>
+    <!--Formulario do login-->
+    <main>
+        <div class="login">
+            <div class="container">
+                <div class="card">
+                    <h2>Choose your way</h2>
+                    <br><br><br>
+                    <div>
+                        E-mail:
+                        <br>
+                        <input id="email_input" type="text" placeholder="Login">
+                        <br>
+                        Senha:
+                        <br>
+                        <input id="senha_input" type="password" placeholder="******">
+                        <br>
+                        <br>
+                        <button class="btn" onclick="entrar()">Entrar</button>
+                    </div>
+
+
+                </div>
+
+                <div id="div_erros_login">
+
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <h3>Butterfly Effect</h3>
+            <p>Change one thing, change everything</p>
+            <ul class="socials">
+                <li><a href="https://www.facebook.com/"><i class="fa fa-facebook"></i></a></li>
+                <li><a href="https://github.com/Rafael-Araujo03"><i class="fa fab fa-github"></i></a></li>
+                <li><a href="https://www.youtube.com/watch?v=B8_dgqfPXFg"><i class="fa fa-youtube"></i></a></li>
+                <li><a href="#"><i class="fa fa-netflix-square"></i></a></li>
+            </ul>
+        </div>
+        <div class="footer-bottom">
+            <p>copyright &copy;2021 SPTECH. designed by <span>Rafael</span></p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
+
+<script>
+    function entrar() {
+
+        var emailVar = email_input.value;
+        var senhaVar = senha_input.value;
+
+        console.log("FORM LOGIN: ", emailVar);
+        console.log("FORM SENHA: ", senhaVar);
+
+        // TODO: VERIFICAR AS VALIDAÇÕES QUE ELES ESTÃO APRENDENDO EM ALGORITMOS 
+        if (emailVar == "" || senhaVar == "") {
+            window.alert("Preencha todos os campos para prosseguir!");
+            return false;
+        }
+
+        if (emailVar.indexOf("@") == -1 || emailVar.indexOf(".com") == -1) {
+            window.alert("Ops, e-mail inválido! Verifique e tente novamente.");
+            return false;
+        }
+
+        fetch("/usuarios/autenticar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                emailServer: emailVar,
+                senhaServer: senhaVar
+            })
+        }).then(function (resposta) {
+            console.log("ESTOU NO THEN DO entrar()!")
+
+            if (resposta.ok) {
+                console.log(resposta);
+
+                resposta.json().then(json => {
+                    console.log(json);
+                    console.log(JSON.stringify(json));
+
+                    sessionStorage.EMAIL_USUARIO = json.email;
+                    sessionStorage.NOME_USUARIO = json.nome;
+                    sessionStorage.ID_USUARIO = json.id;
+
+                    setTimeout(function () {
+                        window.location = "./metrica.html";
+                    }, 1000); // apenas para exibir o loading
+
+                });
+
+            } else {
+
+                console.log("Houve um erro ao tentar realizar o login!");
+
+                resposta.text().then(texto => {
+                    console.error(texto);
+                    // finalizarAguardar(texto);
+                });
+            }
+
+        }).catch(function (erro) {
+            console.log(erro);
+        })
+
+        return false;
+    }
+</script>
