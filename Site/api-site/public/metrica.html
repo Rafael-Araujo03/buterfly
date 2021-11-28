@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/metrica.css">
+    <link rel="icon" href="./imagens/logo.jpg">
+    <title>Butterfly effect</title>
+</head>
+
+<body>
+    <div class="lateral">
+        <div class="left">
+            <h1>Butterfly</h1>
+            <h3>Faça uma escolha <span id="b_usuario">usuário</span>!</h3>
+            <button class="btn_lateral" onclick="sair()">Sair</button>
+        </div>
+    </div>
+
+    <div id="esconder" class="imagem">
+        <div class="card">
+            <h1 class="white">Uma escolha muda tudo</h1>
+            <h4 class="white"> Qual desses filmes você já assistiu:</h4>
+            <div class="nome_filme">
+                <span>Donnie Darko</span>
+                <br><br>
+                <span>Efeito Borboleta</span>
+                <br><br>
+                <span>De Volta Para o Futuro</span>
+            </div>
+            <br>
+            <input placeholder="Qual desses filmes já assistiu?" id="inpFilme" type="text">
+            <br> <br>
+
+            <button onclick="cadastrarFilme()">Cadastrar</button>
+            <button onclick="mais()">Mais assistido</button>
+        </div>
+
+
+    </div>
+    <div id="mostrar" style="display: none;" class="imagem">
+        <div class="card">
+            
+            <h1 class="white"> Filme mais assistido: </h1>
+            <br>
+            <div class="red" id="filme"></div>
+            <button onclick="voltar()">voltar</button>
+           
+        </div>
+    </div>
+    
+</body>
+
+</html>
+<script>
+    var resultadoParaMostrar = "";
+    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+
+    function dizerMetrica() {
+        fetch("/filmes/metrica", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(function (resultado) {
+                resultado.json()
+                    .then(function (json) {
+                        console.log(resultadoParaMostrar);
+
+                        filme.innerHTML =
+                            ` Filme mais assistido por nossos usuarios:<br><span style="color: white;"> ${JSON.parse(JSON.stringify(json[0].nome))}</span> <br><br> Quantidade de usuarios que assistiram:<br><span style="color: white;"> ${JSON.parse(JSON.stringify(json[0].contagem))}</span> <br>`
+                    })
+                    .catch(function (erro) {
+                        console.log(erro);
+                    })
+            })
+            .catch(function (erro) {
+                console.log(erro);
+            })
+    }
+
+    function cadastrarFilme() {
+
+        var filmeVar = inpFilme.value;
+
+        if (filmeVar == "") {
+
+            window.alert("Preencha todos os campos para prosseguir!");
+            if (filmeVar == "") {
+                console.log('Filme está em branco')
+            }
+
+            return false;
+        }
+
+        fetch("/filmes/cadastrarfilme", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fkUsuario: sessionStorage.getItem("ID_USUARIO"),
+                fkFilme: filmeVar
+
+            })
+        }).then(function (resposta) {
+
+            console.log("resposta: ", resposta);
+
+            if (resposta.ok) {
+                window.alert("Cadastro realizado com sucesso!");
+                limparFormulario();
+                // finalizarAguardar();
+
+            } else {
+                throw ("Houve um erro ao tentar realizar o cadastro!");
+            }
+        }).catch(function (resposta) {
+            console.log(`#ERRO: ${resposta}`);
+            //  finalizarAguardar();
+        });
+
+        return false;
+
+    }
+
+    function mais() {
+        esconder.style.display = "none";
+        mostrar.style.display = "block";
+
+        dizerMetrica();
+    }
+
+    function voltar() {
+        esconder.style.display = "block";
+        mostrar.style.display = "none";
+    }
+    // sair volta para o login
+    function sair() {
+        // aguardar();
+        sessionStorage.clear();
+        // finalizarAguardar();
+        window.location = "./login.html";
+    }
+</script>
